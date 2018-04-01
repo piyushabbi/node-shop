@@ -1,6 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const multer = require('multer');
+
+// Storage Strategy
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // callback args: potential error obj | null, path to store, 
+    cb(null, './uploads/');
+  },
+  filename: function(req, file, cb) {
+    cb(null, `date_${file.originalname}` )
+  }
+});
+
+// Filter files for uploading
+const fileFilter = (req, file, cb) => {
+  if( file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    // Store the file 
+    cb(null, true);
+  } else {
+    console.log('Enter correct mime-type. We can also throw an error.');
+    // reject a file. This will not throw an error, but will not save the file.
+    cb(null, false);
+  }
+};
+
+// Initialize object  with multer
+const upload = multer({
+  //dest: 'uploads/'      // Path to folder to store files
+  storage: storage,
+  limits: {
+    fileSize: 1024*1024*3     // Limit File Size to 3Mb in bytes
+  },
+  fileFilter: fileFilter
+});
 
 const Product = require('../models/products');
 
@@ -10,7 +44,7 @@ router.get('/', (req, res, next) => {
   //   message: 'Handling GET requests to /products.'
   // });
   Product.find()
-    .select('name price _id')   // Select method specifies which fields to select.
+    .select('name price _id productImage')   // Select method specifies which fields to select.
     .exec()
     .then(docs => {
       //console.log(docs);
@@ -24,6 +58,7 @@ router.get('/', (req, res, next) => {
             _id: m.id,
             name: m.name,
             price: m.price,
+            productImage: m.productImage,
             url: `http://localhost:3000/products/${m._id}`
           }
         })
@@ -37,12 +72,16 @@ router.get('/', (req, res, next) => {
 
 });
 
-// POST Products
-router.post('/', (req, res, next) => {
+// POST Product. Upload single file, with name productImage
+router.post('/', upload.single('productImage') ,(req, res, next) => {
+
+  console.log(req.file);    // Due to upload middleware, we get access to req.file
+
   const product = new Product({
     _id: new mongoose.Types.ObjectId(),
     name: req.body.name,
-    price: req.body.price
+    price: req.body.price,
+    productImage: req.file.path
   });
   // Save to db
   product.save()
@@ -71,7 +110,7 @@ router.get('/:productId', (req, res, next) => {
 
   // Get Product from db. exec() will convert it to promise.
   Product.findById(id)
-    .select('_id name price')
+    .select('_id name price productImage')
     .exec()
     .then(doc => {
       if (doc) {
@@ -79,6 +118,7 @@ router.get('/:productId', (req, res, next) => {
           _id: doc._id,
           name: doc.name,
           price: doc.price,
+          productImage: doc.productImage,
           url: `http://localhost:3000/products/${doc._id}`
         }
         res.status(200).json(responseObj);

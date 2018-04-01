@@ -9,6 +9,9 @@ const orderRoutes = require('./api/routes/orders');
 
 const app = express();
 
+// Make the uploads folder publically accessible
+app.use('/uploads', express.static('uploads'));
+
 // Logger Middleware
 app.use(morgan('dev'));
 
