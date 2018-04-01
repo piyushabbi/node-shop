@@ -9,6 +9,7 @@ const Product = require('../models/products');
 router.get('/', (req, res, next) => {
   Order.find()
     .select('_id quantity product')
+    .populate('product', 'name')    // To link data of product into orders. While creating schema, we have 1 ref to Prouct stored in product property. 1st arg is the name of the property, 2nd arg is what all values we need.
     .exec()
     .then(docs => {
       const responseObj = {
@@ -82,8 +83,14 @@ router.post('/', (req, res, next) => {
 router.get('/:orderId', (req, res, next) => {
   Order.findById(req.params.orderId)
     .select('_id product quantity')
+    .populate('product', '_id name price')
     .exec()
     .then(doc => {
+      if(!doc) {
+        return res.status(404).json({
+          message: 'Order not found.'
+        });
+      }
       res.status(200).json({
         order: doc,
         request: {
