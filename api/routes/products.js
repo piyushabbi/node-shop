@@ -10,10 +10,25 @@ router.get('/', (req, res, next) => {
   //   message: 'Handling GET requests to /products.'
   // });
   Product.find()
+    .select('name price _id')   // Select method specifies which fields to select.
     .exec()
     .then(docs => {
-      console.log(docs);
-      res.status(200).json(docs)
+      //console.log(docs);
+      //res.status(200).json(docs)
+      
+      // Form a response body
+      const responseObj = {
+        count: docs.length,
+        products: docs.map(m => {
+          return {
+            _id: m.id,
+            name: m.name,
+            price: m.price,
+            url: `http://localhost:3000/products/${m._id}`
+          }
+        })
+      };
+      res.status(200).json(responseObj);
     })
     .catch(error => {
       console.log(error);
@@ -32,12 +47,16 @@ router.post('/', (req, res, next) => {
   // Save to db
   product.save()
     .then(result => {
-      console.log(result);
-      res
-        .status(201)
+      const responseObj = {
+        _id: result.id,
+        name: result.name,
+        price: result.price,
+        url: `http://localhost:3000/products/${result.id}`
+      };
+      res.status(201)
         .json({
-          message: 'Handling POST requests to /products.',
-          createdProduct: result
+          message: 'Created 1 product.',
+          createdProduct: responseObj
         });
     })
     .catch(error => {
@@ -52,11 +71,17 @@ router.get('/:productId', (req, res, next) => {
 
   // Get Product from db. exec() will convert it to promise.
   Product.findById(id)
+    .select('_id name price')
     .exec()
     .then(doc => {
-      console.log(doc);
       if (doc) {
-        res.status(200).json(doc);
+        const responseObj = {
+          _id: doc._id,
+          name: doc.name,
+          price: doc.price,
+          url: `http://localhost:3000/products/${doc._id}`
+        }
+        res.status(200).json(responseObj);
       } else {
         res.status(404).json({ message: 'No valid entry found!' });
       }
@@ -91,7 +116,15 @@ router.patch('/:productId', (req, res, next) => {
   Product.update({ _id: id }, { $set: updateTerm }).exec()
     .then(result => {
       console.log(result);
-      res.status(200).json(result);
+      //res.status(200).json(result);
+      const responseObj = {
+        message: 'Product Updated',
+        request: {
+          method: 'GET',
+          url: `http://localhost:3000/products/${id}`
+        }
+      };
+      res.status(200).json(responseObj);
     })
     .catch(error => {
       console.log(error);
@@ -107,7 +140,15 @@ router.delete('/:productId', (req, res, next) => {
   const id = req.params.productId;
   Product.remove({ _id: id }).exec()
     .then(result => {
-      res.status(200).json(result);
+      const responseObj = {
+        message: 'Product Deleted',
+        request: {
+          method: 'GET',
+          url: 'http://localhost:3000/products'
+        }
+      };
+      //res.status(200).json(result);
+      res.status(200).json(responseObj);
     })
     .catch(error => {
       console.log(error);

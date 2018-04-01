@@ -15,6 +15,9 @@ app.use(morgan('dev'));
 // Connect via Mongoose
 mongoose.connect('mongodb://node-shop:' + process.env.MONGO_ATLAS_PWD + '@node-rest-shop-shard-00-00-zdjhh.mongodb.net:27017,node-rest-shop-shard-00-01-zdjhh.mongodb.net:27017,node-rest-shop-shard-00-02-zdjhh.mongodb.net:27017/test?ssl=true&replicaSet=node-rest-shop-shard-0&authSource=admin');
 
+// Use ES6 Promises
+mongoose.Promise = global.Promise;
+
 // Use bodyParser to use request body
 app.use(bodyParser.urlencoded({
   extended: false
