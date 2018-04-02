@@ -3,6 +3,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
 
+const checkAuth = require('../middleware/check-auth');
+
 // Storage Strategy
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -73,7 +75,7 @@ router.get('/', (req, res, next) => {
 });
 
 // POST Product. Upload single file, with name productImage
-router.post('/', upload.single('productImage') ,(req, res, next) => {
+router.post('/', checkAuth, upload.single('productImage') ,(req, res, next) => {
 
   console.log(req.file);    // Due to upload middleware, we get access to req.file
 
@@ -133,7 +135,7 @@ router.get('/:productId', (req, res, next) => {
 });
 
 // PATCH Product
-router.patch('/:productId', (req, res, next) => {
+router.patch('/:productId', checkAuth, (req, res, next) => {
   // res.status(200).json({
   //   message: 'Updted | Patched Product'
   // });
@@ -173,7 +175,7 @@ router.patch('/:productId', (req, res, next) => {
 });
 
 // DELETE Product
-router.delete('/:productId', (req, res, next) => {
+router.delete('/:productId', checkAuth, (req, res, next) => {
   // res.status(200).json({
   //   message: 'Deleted Product.'
   // });

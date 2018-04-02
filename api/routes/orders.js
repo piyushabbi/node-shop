@@ -5,8 +5,10 @@ const mongoose = require('mongoose');
 const Order = require('../models/orders');
 const Product = require('../models/products');
 
+const checkAuth = require('../middleware/check-auth');
+
 // GET Orders
-router.get('/', (req, res, next) => {
+router.get('/', checkAuth, (req, res, next) => {
   Order.find()
     .select('_id quantity product')
     .populate('product', 'name')    // To link data of product into orders. While creating schema, we have 1 ref to Prouct stored in product property. 1st arg is the name of the property, 2nd arg is what all values we need.
@@ -35,7 +37,7 @@ router.get('/', (req, res, next) => {
 });
 
 // POST Orders
-router.post('/', (req, res, next) => {
+router.post('/', checkAuth, (req, res, next) => {
   // Create an order, only if the product with that Id exists
   Product.findById(req.body.productId)
     .exec()
@@ -80,7 +82,7 @@ router.post('/', (req, res, next) => {
 });
 
 // GET orderId
-router.get('/:orderId', (req, res, next) => {
+router.get('/:orderId', checkAuth, (req, res, next) => {
   Order.findById(req.params.orderId)
     .select('_id product quantity')
     .populate('product', '_id name price')
@@ -105,7 +107,7 @@ router.get('/:orderId', (req, res, next) => {
 });
 
 // DELETE orderId
-router.delete('/:orderId', (req, res, next) => {
+router.delete('/:orderId', checkAuth, (req, res, next) => {
   Order.remove({ _id: req.params.orderId })
     .exec()
     .then(result => {
@@ -121,6 +123,5 @@ router.delete('/:orderId', (req, res, next) => {
       res.status(500).json(error);
     })
 });
-
 
 module.exports = router;
