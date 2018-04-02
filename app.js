@@ -3,9 +3,10 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
+// Import Routes
 const productRoutes = require('./api/routes/products');
-
 const orderRoutes = require('./api/routes/orders');
+const userRoutes = require('./api/routes/user');
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use((req, res, next) => {
 // Routes to handle requests
 app.use('/products', productRoutes);
 app.use('/orders', orderRoutes);
+app.use('/user', userRoutes);
 
 // 404 Error
 app.use((req, res, next) => {
