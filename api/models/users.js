@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Create Schema
+// Create Schema. Match will match the given regex.
 const userSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
   email: {
